@@ -3323,6 +3323,7 @@ CONFIG_NLS_ISO8859_1=y
 
 # Tuxera exFAT need enable this configuration
 CONFIG_NLS_UTF8=y
+CONFIG_DYNAMIC_FSYNC=y
 
 #
 # Kernel hacking
