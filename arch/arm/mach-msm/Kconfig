@@ -3207,6 +3207,12 @@ config MSM_CPU_PWRCTL
 	  stand alone power collapse operation. Selecting this option
 	  ensures that they are always off.
 
+config HAS_MACH_MEMUTILS
+	default n
+	bool "Motorola MSM memcpy enhancements"
+	help
+	Faster memcpy performance for Krait
+
 config QUALCOMM_WLAN_PXO
 	default n
 	bool "Use PXO for WLAN clock source"
