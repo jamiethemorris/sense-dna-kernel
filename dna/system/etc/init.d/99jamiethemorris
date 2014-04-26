@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 (
-if grep crpalmer /proc/version > /dev/null
+if grep jamiethemorris /proc/version > /dev/null
 then
    echo "** jamiethemorris's boot configuration:"
    
