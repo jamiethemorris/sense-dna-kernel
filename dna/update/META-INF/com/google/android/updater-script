@@ -1,0 +1,34 @@
+ui_print("jamiethemorris's HTC Droid DNA Kernel");
+ui_print("==> CM 11.0 based ROMs");
+
+ui_print("Mounting /system");
+mount("ext4", "EMMC", "/dev/block/mmcblk0p32", "/system");
+
+ui_print("Installing modules");
+package_extract_dir("system", "/system");
+set_perm(0, 0, 0755, "/system/./etc/init.d/99crpalmer"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/intelliplug.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/lightsensor.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/iosched.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/gpufreq.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/dt2w.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/uv-override.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/gpugov.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/color-enhancement.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/under-volt.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/s2w.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/fastcharge.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/cpufreq.sh"); set_perm(0, 0, 0755, "/system/./etc/crpalmer/dynfsync.sh");  
+ui_print("Unmounting Filesystems");
+unmount("/system");
+
+ifelse(
+    package_extract_file("boot.img", "/tmp/boot.img"),
+(
+    ui_print("Using prebuilt boot.img");
+),
+(
+    ui_print("Extracting anykernel tools");
+    package_extract_dir("kernel", "/tmp");
+    ui_print("Creating Boot Image basd on existing boot.img");
+    set_perm(0, 0, 0777, "/tmp/dd");
+    set_perm(0, 0, 0777, "/tmp/abootimg");
+    ui_print("Extracting existing boot.img...");
+    run_program("/tmp/dd", "if=/dev/block/mmcblk0p19", "of=/tmp/boot.img");;
+    ui_print("Replacing kernel in boot.img and setting ramdisk addr...");
+    run_program("/tmp/abootimg", "-u", "/tmp/boot.img", "-c", "ramdiskaddr=0x82000000", "-k", "/tmp/zImage");
+));
+
+ui_print("Flashing boot.img");
+
+assert(write_raw_image("/tmp/boot.img", "boot"));
+
+ui_print("Done");
