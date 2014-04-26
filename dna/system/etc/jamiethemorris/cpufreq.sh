@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-F=/sdcard/crpalmer-cpufreq-
+F=/sdcard/jamiethemorris-cpufreq-
 SYS=/sys/devices/system/cpu/cpu
 must_lock=0
 
