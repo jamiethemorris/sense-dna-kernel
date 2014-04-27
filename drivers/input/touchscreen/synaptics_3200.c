@@ -51,7 +51,6 @@
 #define SYN_UPDATE_RETRY_TIMES 5
 #define SHIFT_BITS 10
 #define SYN_WIRELESS_DEBUG
-#define SYN_CALIBRATION_CONTROL
 
 #define MAX_PRESSURE 65535
 #define MAX_WIDTH 30
@@ -2196,8 +2195,7 @@ static int synaptics_init_panel(struct synaptics_ts_data *ts)
 static void synaptics_ts_finger_func(struct synaptics_ts_data *ts)
 {
 	int ret;
-	uint8_t buf[ts->finger_support * 8 ], noise_index[10];
-	uint16_t temp_im = 0, temp_cidim = 0;
+	uint8_t buf[ts->finger_support * 8 ], noise_index[10], noise_state = 0;
 	static int x_pos[10] = {0}, y_pos[10] = {0};
 
 	memset(buf, 0x0, sizeof(buf));
@@ -2209,9 +2207,15 @@ static void synaptics_ts_finger_func(struct synaptics_ts_data *ts)
 		ret = i2c_syn_read(ts->client,
 			get_address_base(ts, ts->finger_func_idx, DATA_BASE), buf, sizeof(buf));
 		ret = i2c_syn_read(ts->client,
-			get_address_base(ts, 0x54, DATA_BASE) + 4, noise_index, sizeof(noise_index));
-		temp_im = (noise_index[1] <<8) | noise_index[0];
-		temp_cidim = (noise_index[6] <<8) | noise_index[5];
+			get_address_base(ts, 0x54, DATA_BASE) + 8, &noise_state, 1);
+		if (noise_state == 2) {
+			ret = i2c_syn_read(ts->client,
+				get_address_base(ts, 0x54, DATA_BASE) + 4, noise_index, sizeof(noise_index));
+			ts->debug_log_level |= BIT(17);
+		} else {
+			if (!ts->enable_noise_log)
+				ts->debug_log_level &= ~BIT(17);
+		}
 	}
 	if (ret < 0) {
 		i2c_syn_error_handler(ts, ts->i2c_err_handler_en, "r:1", __func__);
@@ -2295,14 +2299,12 @@ static void synaptics_ts_finger_func(struct synaptics_ts_data *ts)
 							"[TP] Screen:F[%02d]:Up, X=%d, Y=%d, W=%d, Z=%d\n",
 							i+1, (x_pos[i]*ts->width_factor)>>SHIFT_BITS,
 							(y_pos[i]*ts->height_factor)>>SHIFT_BITS,
-							finger_data[i][2], finger_data[i][3],
-							temp_im, temp_cidim, noise_index[9], noise_index[4]);
+							finger_data[i][2], finger_data[i][3]);
 					} else {
 						pr_debug(
 							"[TP] Raw:F[%02d]:Up, X=%d, Y=%d, W=%d, Z=%d\n",
 							i+1, x_pos[i], y_pos[i],
-							finger_data[i][2], finger_data[i][3],
-							temp_im, temp_cidim, noise_index[9], noise_index[4]);
+							finger_data[i][2], finger_data[i][3]);
 					}
 				}
 				base += 5;
@@ -2499,14 +2501,12 @@ static void synaptics_ts_finger_func(struct synaptics_ts_data *ts)
 									"[TP] Screen:F[%02d]:Down, X=%d, Y=%d, W=%d, Z=%d\n",
 									i+1, (finger_data[i][0]*ts->width_factor)>>SHIFT_BITS,
 									(finger_data[i][1]*ts->height_factor)>>SHIFT_BITS,
-									finger_data[i][2], finger_data[i][3],
-									temp_im, temp_cidim, noise_index[9], noise_index[4]);
+									finger_data[i][2], finger_data[i][3]);
 							} else {
 								pr_debug(
 									"[TP] Raw:F[%02d]:Down, X=%d, Y=%d, W=%d, Z=%d\n",
 									i+1, finger_data[i][0], finger_data[i][1],
-									finger_data[i][2], finger_data[i][3],
-									temp_im, temp_cidim, noise_index[9], noise_index[4]);
+									finger_data[i][2], finger_data[i][3]);
 							}
 							if ((ts->block_touch_time_near | ts->block_touch_time_far) && ts->block_touch_event)
 								printk(KERN_INFO "[TP] Block This Event!!\n");
