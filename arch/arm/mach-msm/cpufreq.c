@@ -52,6 +52,10 @@ static struct msm_bus_scale_pdata bus_bw = {
 };
 static u32 bus_client;
 
+#ifdef CONFIG_MSM_CPU_FREQ_SET_DEFAULT_MIN_MAX
+static DEFINE_PER_CPU(bool, set_default_min_max);
+#endif
+
 struct cpufreq_work_struct {
 	struct work_struct work;
 	struct cpufreq_policy *policy;
@@ -63,10 +67,6 @@ struct cpufreq_work_struct {
 
 static DEFINE_PER_CPU(struct cpufreq_work_struct, cpufreq_work);
 static struct workqueue_struct *msm_cpufreq_wq;
-
-#ifdef CONFIG_MSM_CPU_FREQ_SET_DEFAULT_MIN_MAX
-static DEFINE_PER_CPU(bool, set_default_min_max);
-#endif
 
 struct cpufreq_suspend_t {
 	struct mutex suspend_mutex;
@@ -111,6 +111,10 @@ static void update_l2_bw(int *also_cpu)
 	if (rc)
 		pr_err("Bandwidth req failed (%d)\n", rc);
 
+out:
+	mutex_unlock(&l2bw_lock);
+}
+
 void mach_msm_cpufreq_get_limits(int cpu, unsigned *low, unsigned *high)
 {
 	struct cpu_freq *limit = &per_cpu(cpu_freq_info, cpu);
@@ -121,10 +125,6 @@ void mach_msm_cpufreq_get_limits(int cpu, unsigned *low, unsigned *high)
 	} else {
 		*low = *high = 0;
 	}
-}
-
-out:
-	mutex_unlock(&l2bw_lock);
 }
 
 static int set_cpu_freq(struct cpufreq_policy *policy, unsigned int new_freq,
@@ -338,7 +338,6 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 	int ret = 0;
 	struct cpufreq_frequency_table *table;
 	struct cpufreq_work_struct *cpu_work = NULL;
-
 #ifdef CONFIG_MSM_CPU_FREQ_SET_DEFAULT_MIN_MAX
 	bool *have_set_default_min_max = &per_cpu(set_default_min_max, policy->cpu);
 #endif
@@ -409,6 +408,44 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 	return 0;
 }
 
+
+#ifdef CONFIG_CPU_FREQ_GOV_INTELLIDEMAND
+extern bool lmf_screen_state;
+#endif
+
+static void msm_cpu_early_suspend(struct early_suspend *h)
+{
+#ifdef CONFIG_CPUFREQ_LIMIT_MAX_FREQ
+	int cpu = 0;
+
+	for_each_possible_cpu(cpu) {
+		mutex_lock(&per_cpu(cpufreq_suspend, cpu).suspend_mutex);
+		lmf_screen_state = false;
+		mutex_unlock(&per_cpu(cpufreq_suspend, cpu).suspend_mutex);
+	}
+#endif
+}
+
+static void msm_cpu_late_resume(struct early_suspend *h)
+{
+#ifdef CONFIG_CPUFREQ_LIMIT_MAX_FREQ
+	int cpu = 0;
+
+	for_each_possible_cpu(cpu) {
+
+		mutex_lock(&per_cpu(cpufreq_suspend, cpu).suspend_mutex);
+		lmf_screen_state = true;
+		mutex_unlock(&per_cpu(cpufreq_suspend, cpu).suspend_mutex);
+	}
+#endif
+}
+
+static struct early_suspend msm_cpu_early_suspend_handler = {
+	.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN,
+	.suspend = msm_cpu_early_suspend,
+	.resume = msm_cpu_late_resume,
+};
+
 static int __cpuinit msm_cpufreq_cpu_callback(struct notifier_block *nfb,
 		unsigned long action, void *hcpu)
 {
@@ -464,45 +501,6 @@ static struct notifier_block __refdata msm_cpufreq_cpu_notifier = {
  * governor tries to change the frequency after coming out of suspend.
  */
 static int msm_cpufreq_suspend(struct cpufreq_policy *policy)
-
-#ifdef CONFIG_CPU_FREQ_GOV_INTELLIDEMAND
-extern bool lmf_screen_state;
-#endif
-
-static void msm_cpu_early_suspend(struct early_suspend *h)
-{
-#ifdef CONFIG_CPUFREQ_LIMIT_MAX_FREQ
-	int cpu = 0;
-
-	for_each_possible_cpu(cpu) {
-		mutex_lock(&per_cpu(cpufreq_suspend, cpu).suspend_mutex);
-		lmf_screen_state = false;
-		mutex_unlock(&per_cpu(cpufreq_suspend, cpu).suspend_mutex);
-	}
-#endif
-}
-
-static void msm_cpu_late_resume(struct early_suspend *h)
-{
-#ifdef CONFIG_CPUFREQ_LIMIT_MAX_FREQ
-	int cpu = 0;
-
-	for_each_possible_cpu(cpu) {
-
-		mutex_lock(&per_cpu(cpufreq_suspend, cpu).suspend_mutex);
-		lmf_screen_state = true;
-		mutex_unlock(&per_cpu(cpufreq_suspend, cpu).suspend_mutex);
-	}
-#endif
-}
-
-static struct early_suspend msm_cpu_early_suspend_handler = {
-	.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN,
-	.suspend = msm_cpu_early_suspend,
-	.resume = msm_cpu_late_resume,
-};
-
-static int msm_cpufreq_suspend(void)
 {
 	int cpu;
 
