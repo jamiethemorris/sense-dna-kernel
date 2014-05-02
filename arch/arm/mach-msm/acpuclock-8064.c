@@ -21,9 +21,6 @@
 #include "mach/socinfo.h"
 #include "acpuclock.h"
 #include "acpuclock-krait.h"
-#ifdef CONFIG_PERFLOCK
-#include <mach/perflock.h>
-#endif
 
 
 static struct hfpll_data hfpll_data __initdata = {
@@ -51,9 +48,9 @@ static struct scalable scalable[] __initdata = {
 		.aux_clk_sel = 3,
 		.sec_clk_sel = 2,
 		.l2cpmr_iaddr = 0x4501,
-		.vreg[VREG_CORE] = { "krait0", 1450000 },
-		.vreg[VREG_MEM]  = { "krait0_mem", 1250000 },
-		.vreg[VREG_DIG]  = { "krait0_dig", 1250000 },
+		.vreg[VREG_CORE] = { "krait0", 1350000 },
+		.vreg[VREG_MEM]  = { "krait0_mem", 1150000 },
+		.vreg[VREG_DIG]  = { "krait0_dig", 1150000 },
 		.vreg[VREG_HFPLL_A] = { "krait0_hfpll", 1800000 },
 	},
 	[CPU1] = {
@@ -62,9 +59,9 @@ static struct scalable scalable[] __initdata = {
 		.aux_clk_sel = 3,
 		.sec_clk_sel = 2,
 		.l2cpmr_iaddr = 0x5501,
-		.vreg[VREG_CORE] = { "krait1", 1450000 },
-		.vreg[VREG_MEM]  = { "krait1_mem", 1250000 },
-		.vreg[VREG_DIG]  = { "krait1_dig", 1250000 },
+		.vreg[VREG_CORE] = { "krait1", 1350000 },
+		.vreg[VREG_MEM]  = { "krait1_mem", 1150000 },
+		.vreg[VREG_DIG]  = { "krait1_dig", 1150000 },
 		.vreg[VREG_HFPLL_A] = { "krait1_hfpll", 1800000 },
 	},
 	[CPU2] = {
@@ -73,9 +70,9 @@ static struct scalable scalable[] __initdata = {
 		.aux_clk_sel = 3,
 		.sec_clk_sel = 2,
 		.l2cpmr_iaddr = 0x6501,
-		.vreg[VREG_CORE] = { "krait2", 1450000 },
-		.vreg[VREG_MEM]  = { "krait2_mem", 1250000 },
-		.vreg[VREG_DIG]  = { "krait2_dig", 1250000 },
+		.vreg[VREG_CORE] = { "krait2", 1350000 },
+		.vreg[VREG_MEM]  = { "krait2_mem", 1150000 },
+		.vreg[VREG_DIG]  = { "krait2_dig", 1150000 },
 		.vreg[VREG_HFPLL_A] = { "krait2_hfpll", 1800000 },
 	},
 	[CPU3] = {
@@ -84,9 +81,9 @@ static struct scalable scalable[] __initdata = {
 		.aux_clk_sel = 3,
 		.sec_clk_sel = 2,
 		.l2cpmr_iaddr = 0x7501,
-		.vreg[VREG_CORE] = { "krait3", 1450000 },
-		.vreg[VREG_MEM]  = { "krait3_mem", 1250000 },
-		.vreg[VREG_DIG]  = { "krait3_dig", 1250000 },
+		.vreg[VREG_CORE] = { "krait3", 1350000 },
+		.vreg[VREG_MEM]  = { "krait3_mem", 1150000 },
+		.vreg[VREG_DIG]  = { "krait3_dig", 1150000 },
 		.vreg[VREG_HFPLL_A] = { "krait3_hfpll", 1800000 },
 	},
 	[L2] = {
@@ -170,7 +167,7 @@ static struct acpu_level tbl_slow[] __initdata = {
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(15), 1300000 },
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(15), 1300000 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(15), 1325000 },
-	{ 1, {  1917000, HFPLL, 1, 0x47 }, L2(15), 1400000 },
+	//{ 1, {  1917000, HFPLL, 1, 0x47 }, L2(15), 1400000 },
 	{ 0, { 0 } }
 };
 
@@ -204,7 +201,7 @@ static struct acpu_level tbl_nom[] __initdata = {
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(15), 1250000 },
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(15), 1262500 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(15), 1275000 },
-	{ 1, {  1917000, HFPLL, 1, 0x47 }, L2(15), 1375000 },
+	//{ 1, {  1917000, HFPLL, 1, 0x47 }, L2(15), 1375000 },
 	{ 0, { 0 } }
 };
 
@@ -238,7 +235,7 @@ static struct acpu_level tbl_fast[] __initdata = {
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(15), 1200000 },
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(15), 1225000 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(15), 1250000 },
-	{ 1, {  1917000, HFPLL, 1, 0x47 }, L2(15), 1350000 },
+	//{ 1, {  1917000, HFPLL, 1, 0x47 }, L2(15), 1350000 },
 	{ 0, { 0 } }
 };
 
@@ -272,7 +269,7 @@ static struct acpu_level tbl_faster[] __initdata = {
 	{ 1, {  1728000, HFPLL, 1, 0x40 }, L2(15), 1200000 },
 	{ 1, {  1836000, HFPLL, 1, 0x44 }, L2(15), 1200000 },
 	{ 1, {  1890000, HFPLL, 1, 0x46 }, L2(15), 1225000 },
-	{ 1, {  1917000, HFPLL, 1, 0x47 }, L2(15), 1275000 },
+	//{ 1, {  1917000, HFPLL, 1, 0x47 }, L2(15), 1275000 },
 	{ 0, { 0 } }
 };
 
@@ -570,57 +567,6 @@ static struct acpuclk_krait_params acpuclk_8064_params __initdata = {
 	.stby_khz = 384000,
 };
 
-#ifdef CONFIG_PERFLOCK
-unsigned msm8064_perf_acpu_table[] = {
-	594000000, 
-	810000000, 
-	1026000000,
-	1134000000,
-	1512000000, 
-};
-
-static struct perflock_data msm8064_floor_data = {
-	.perf_acpu_table = msm8064_perf_acpu_table,
-	.table_size = ARRAY_SIZE(msm8064_perf_acpu_table),
-};
-
-static struct perflock_data msm8064_cpufreq_ceiling_data = {
-	.perf_acpu_table = msm8064_perf_acpu_table,
-	.table_size = ARRAY_SIZE(msm8064_perf_acpu_table),
-};
-
-static struct perflock_pdata perflock_pdata = {
-	.perf_floor = &msm8064_floor_data,
-	.perf_ceiling = &msm8064_cpufreq_ceiling_data,
-};
-
-struct platform_device msm8064_device_perf_lock = {
-	.name = "perf_lock",
-	.id = -1,
-	.dev = {
-		.platform_data = &perflock_pdata,
-	},
-};
-
-extern uint32_t __init msm_get_cpu_speed_bin(void);
-static void __init perftable_fix_up(void)
-{
-	uint32_t speed;
-	speed = msm_get_cpu_speed_bin();
-	
-	if(speed == 0)
-		msm8064_perf_acpu_table[PERF_LOCK_HIGHEST] = 1512000000;
-	
-	else if(speed == 1)
-		msm8064_perf_acpu_table[PERF_LOCK_HIGHEST] = 1566000000;
-	
-	else if(speed == 2)
-		msm8064_perf_acpu_table[PERF_LOCK_HIGHEST] = 1566000000;
-	
-	else
-		msm8064_perf_acpu_table[PERF_LOCK_HIGHEST] = 1512000000;
-}
-#endif
 
 static int __init acpuclk_8064_probe(struct platform_device *pdev)
 {
@@ -632,11 +578,6 @@ static int __init acpuclk_8064_probe(struct platform_device *pdev)
 	}
 
 	ret = acpuclk_krait_init(&pdev->dev, &acpuclk_8064_params);
-
-#ifdef CONFIG_PERFLOCK
-		if (!ret)
-			perftable_fix_up();
-#endif
 	return ret;
 }
 

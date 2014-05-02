@@ -896,8 +896,8 @@ static void __init bus_init(const struct l2_level *l2_level)
 
 #ifdef CONFIG_CPU_VOLTAGE_TABLE
 
-#define HFPLL_MIN_VDD		 800000
-#define HFPLL_MAX_VDD		1350000
+#define HFPLL_MIN_VDD		 600000
+#define HFPLL_MAX_VDD		1450000
 
 ssize_t acpuclk_get_vdd_levels_str(char *buf) {
 
@@ -937,7 +937,7 @@ void acpuclk_set_vdd(unsigned int khz, int vdd_uv) {
 
 		drv.acpu_freq_tbl[i].vdd_core = new_vdd_uv;
 	}
-	pr_warn("faux123: user voltage table modified!\n");
+	pr_warn("%s: user voltage table modified!\n", __func__);
 	mutex_unlock(&driver_lock);
 }
 #endif	/* CONFIG_CPU_VOTALGE_TABLE */
