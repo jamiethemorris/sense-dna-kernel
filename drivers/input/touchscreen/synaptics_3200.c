@@ -394,8 +394,8 @@ static void logo2wake_longtap_count(struct work_struct * logo2wake_longtap_count
 		if ((pocket_detect && !pocket_detection_check()) || !pocket_detect) {
 			if (gestures_switch && scr_suspended) {
 				report_gesture(6);
-			} else if (l2w_switch) {
 				// vibrate(vib_strength);
+			} else if (l2w_switch) {
 				input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 1);
 				input_sync(sweep2wake_pwrdev);
 				msleep(100);
